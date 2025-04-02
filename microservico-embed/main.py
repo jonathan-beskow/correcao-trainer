@@ -72,6 +72,12 @@ class CorrecaoRequest(BaseModel):
 
 @app.post("/gerar-correcao")
 async def gerar_correcao(req: CorrecaoRequest):
+
+    print("\n Requisição recebida em /gerar-correcao")
+    print("Código vulnerável:\n", req.exemplos[0].codigo_original)
+    print("Código corrigido:\n", req.exemplos[0].codigo_corrigido)
+    print("Código alvo a ser corrigido:\n", req.codigo_alvo)
+
     prompt = f"""
 Você é um assistente especializado em segurança de software. Dada uma vulnerabilidade do tipo {req.tipo},
 e um exemplo de código vulnerável com sua respectiva correção, você deve corrigir um novo código que contém a mesma falha.

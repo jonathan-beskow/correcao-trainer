@@ -1,36 +1,43 @@
-<form #formulario="ngForm" (ngSubmit)="cadastrarCaso()" novalidate>
-  
-    <!-- Campo: Tipo -->
-    <label>Nome do Apontamento:</label>
-    <input
-      type="text"
-      name="tipo"
-      [(ngModel)]="tipo"
-      required
-      class="form-control"
-    />
-  
-    <!-- Campo: Código Original -->
-    <label>Código Original:</label>
-    <textarea
-      name="codigoOriginal"
-      [(ngModel)]="codigoOriginal"
-      required
-      class="form-control"
-      rows="4"
-    ></textarea>
-  
-    <!-- Campo: Código Corrigido -->
-    <label>Código Corrigido:</label>
-    <textarea
-      name="codigoCorrigido"
-      [(ngModel)]="codigoCorrigido"
-      required
-      class="form-control"
-      rows="4"
-    ></textarea>
-  
-    <!-- Botão -->
-    <button type="submit" class="btn btn-primary mt-3">Cadastrar</button>
-  </form>
-  
+<form #formulario="ngForm" (ngSubmit)="cadastrarCaso()" novalidate class="form-container">
+
+  <h2 class="form-title">Cadastrar Vulnerabilidade Corrigida</h2>
+
+  <!-- Campo: Tipo -->
+  <label for="tipo">Nome do Apontamento:</label>
+  <input
+    id="tipo"
+    type="text"
+    name="tipo"
+    [(ngModel)]="tipo"
+    required
+    class="form-control"
+  />
+
+  <!-- Campo: Código Original -->
+  <label for="codigoOriginal">Código Original:</label>
+  <textarea
+    id="codigoOriginal"
+    name="codigoOriginal"
+    [(ngModel)]="codigoOriginal"
+    required
+    class="form-control"
+    rows="4"
+  ></textarea>
+
+  <!-- Campo: Código Corrigido -->
+  <label for="codigoCorrigido">Código Corrigido:</label>
+  <textarea
+    id="codigoCorrigido"
+    name="codigoCorrigido"
+    [(ngModel)]="codigoCorrigido"
+    required
+    class="form-control"
+    rows="4"
+  ></textarea>
+
+  <!-- Botões -->
+  <div class="button-row">
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+    <button type="button" class="btn btn-secondary" (click)="voltar()">Voltar</button>
+  </div>
+</form>

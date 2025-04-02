@@ -10,6 +10,7 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   sugerir(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/sugerir-correcao/corrigir`, {payload});
+    return this.http.post(`${this.baseUrl}/sugerir-correcao/corrigir`, payload);
   }
+
 }

@@ -12,8 +12,33 @@
     <button (click)="cadastrarCorrecao()">Cadastrar Correção</button>
   </div>
 
-  <div *ngIf="correcao">
-    <h4>Correção Sugerida:</h4>
-    <pre>{{ correcao }}</pre>
+<!-- ⏳ GIF animado enquanto carrega -->
+<div *ngIf="loading" class="loading-container">
+  <img src="https://i.gifer.com/YCZH.gif" alt="Carregando..." class="loading-gif" />
+  <p>Gerando sugestão de correção...</p>
+</div>
+
+<!-- ⚠️ Timeout / Erro -->
+<div *ngIf="timeoutMsg" class="erro-msg">
+  <p>{{ timeoutMsg }}</p>
+</div>
+
+
+<div *ngIf="correcao" class="resultado-container">
+  <h4>Justificativa da Correção:</h4>
+  <p class="explicacao">{{ formatarCodigoCompleto(correcao).justificativa }}</p>
+
+  <h4>Código Corrigido:</h4>
+  <pre class="codigo-html">{{ formatarCodigoCompleto(correcao).codigo }}</pre>
+
+  <button class="copy-btn" (click)="copiarParaClipboard()">Copiar</button>
+
+</div>
+
+
+
+  <!-- ✅ Link para ver os apontamentos cadastrados -->
+  <div style="margin-top: 2rem; text-align: center;">
+    <a routerLink="/listar" class="ver-apontamentos-link">🔍 Ver Apontamentos Cadastrados</a>
   </div>
 </div>

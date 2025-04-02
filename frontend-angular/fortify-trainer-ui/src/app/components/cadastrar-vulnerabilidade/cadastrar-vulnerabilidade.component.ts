@@ -19,6 +19,10 @@ export class CadastrarVulnerabilidadeComponent {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  voltar() {
+    this.router.navigate(['/']);
+  }
+
   cadastrarCaso() {
     const payload = {
       tipo: this.tipo,
