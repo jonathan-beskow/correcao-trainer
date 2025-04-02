@@ -5,13 +5,20 @@ import com.example.demo.repository.CasoCorrigidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class SimilaridadeService {
 
     @Autowired
     private CasoCorrigidoRepository repository;
+
+    @Autowired
+    private VetorizacaoService vetorizacaoService;
+
+    @Autowired
+    private CasoCorrigidoRepository casoCorrigidoRepository;
 
     public List<CasoCorrigidoComSimilaridade> buscarSimilares(List<Float> novoEmbedding, String tipo) {
         List<CasoCorrigido> casos = repository.findByTipo(tipo);
@@ -58,4 +65,19 @@ public class SimilaridadeService {
             return similaridade;
         }
     }
+
+
+    public boolean inserirCasoCorrigido(CasoCorrigido caso) {
+        try {
+            List<Float> embedding = vetorizacaoService.gerarEmbedding(caso.getCodigoOriginal(), caso.getTipo());
+            caso.setEmbedding(embedding);
+            casoCorrigidoRepository.save(caso);
+            return true;
+        } catch (Exception e) {
+            System.out.println("Erro ao inserir caso: " + e.getMessage());
+            return false;
+        }
+    }
+
 }
+

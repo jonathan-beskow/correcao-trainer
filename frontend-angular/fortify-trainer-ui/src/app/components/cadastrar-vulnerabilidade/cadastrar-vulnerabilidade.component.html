@@ -1,0 +1,36 @@
+<form #formulario="ngForm" (ngSubmit)="cadastrarCaso()" novalidate>
+  
+    <!-- Campo: Tipo -->
+    <label>Nome do Apontamento:</label>
+    <input
+      type="text"
+      name="tipo"
+      [(ngModel)]="tipo"
+      required
+      class="form-control"
+    />
+  
+    <!-- Campo: Código Original -->
+    <label>Código Original:</label>
+    <textarea
+      name="codigoOriginal"
+      [(ngModel)]="codigoOriginal"
+      required
+      class="form-control"
+      rows="4"
+    ></textarea>
+  
+    <!-- Campo: Código Corrigido -->
+    <label>Código Corrigido:</label>
+    <textarea
+      name="codigoCorrigido"
+      [(ngModel)]="codigoCorrigido"
+      required
+      class="form-control"
+      rows="4"
+    ></textarea>
+  
+    <!-- Botão -->
+    <button type="submit" class="btn btn-primary mt-3">Cadastrar</button>
+  </form>
+  

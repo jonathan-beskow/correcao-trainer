@@ -1,0 +1,19 @@
+<div class="suggestion-container">
+  <h2>Sugerir Correção de Código</h2>
+
+  <label for="tipo">Tipo de vulnerabilidade:</label>
+  <input id="tipo" [(ngModel)]="tipo" placeholder="Ex: SQL Injection" />
+
+  <label for="codigo">Código vulnerável:</label>
+  <textarea id="codigo" [(ngModel)]="codigo" placeholder="Cole seu código aqui..." rows="8"></textarea>
+
+  <div class="button-row">
+    <button (click)="sugerirCorrecao()">Sugerir Correção</button>
+    <button (click)="cadastrarCorrecao()">Cadastrar Correção</button>
+  </div>
+
+  <div *ngIf="correcao">
+    <h4>Correção Sugerida:</h4>
+    <pre>{{ correcao }}</pre>
+  </div>
+</div>

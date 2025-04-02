@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  java-backend:
+    build:
+      context: ./demo
+      dockerfile: Dockerfile
+      # força rebuild mesmo se cache existir
+      # dica: combine com --build na CLI
+    container_name: java-backend
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/testdb
+    depends_on:
+      - mongo
+      - microservico-embed
+
+  microservico-embed:
+    build:
+      context: ./microservico-embed
+    container_name: microservico-embed
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env  # <-- Adiciona esta linha!
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/embed"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
