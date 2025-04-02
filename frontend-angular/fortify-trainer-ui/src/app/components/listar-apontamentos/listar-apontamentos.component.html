@@ -5,13 +5,16 @@
   <div *ngIf="erro">{{ erro }}</div>
 
   <ul *ngIf="!loading && apontamentos.length > 0">
-    <li *ngFor="let item of apontamentos">🛡️ {{ item }}</li>
+    <li *ngFor="let item of apontamentos">
+      🛡️ <strong>{{ item.tipo }}</strong> — {{ item.total }} ocorrência(s)
+    </li>
   </ul>
 
   <div *ngIf="!loading && apontamentos.length === 0">
     Nenhum apontamento encontrado.
   </div>
 </div>
+
 <div style="text-align: center; margin-top: 2rem;">
   <button class="btn-voltar" (click)="voltar()">Voltar</button>
 </div>

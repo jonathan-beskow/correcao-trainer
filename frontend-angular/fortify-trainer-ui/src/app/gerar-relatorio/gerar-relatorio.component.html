@@ -1,0 +1,18 @@
+<div class="gerar-relatorio">
+  <h2>Gerar Relatório de Falsos Positivos</h2>
+
+  <!-- Formulário de upload -->
+  <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="file">Selecione um arquivo CSV</label>
+      <input type="file" id="file" (change)="onFileChange($event)" accept=".csv" />
+    </div>
+    <div>
+      <button type="submit" [disabled]="loading">Gerar Relatório</button>
+    </div>
+  </form>
+
+  <!-- Mensagens de erro ou loading -->
+  <div *ngIf="loading">Carregando...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+</div>
