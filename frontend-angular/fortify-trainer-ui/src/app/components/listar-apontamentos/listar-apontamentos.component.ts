@@ -18,7 +18,7 @@ export class ListarApontamentosComponent implements OnInit {
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.http.get<any[]>('http://localhost:8081/casos-corrigidos/tipos')
+    this.http.get<any[]>('http://localhost:8081/estatisticas/tipos') // 🔧 Corrigido aqui
       .subscribe({
         next: (data) => {
           this.apontamentos = data;
@@ -30,6 +30,7 @@ export class ListarApontamentosComponent implements OnInit {
         }
       });
   }
+
   voltar() {
     this.router.navigate(['/']);
   }

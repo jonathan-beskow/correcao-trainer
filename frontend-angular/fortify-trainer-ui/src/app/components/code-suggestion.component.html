@@ -12,33 +12,33 @@
     <button (click)="cadastrarCorrecao()">Cadastrar Correção</button>
   </div>
 
-<!-- ⏳ GIF animado enquanto carrega -->
-<div *ngIf="loading" class="loading-container">
-  <img src="https://i.gifer.com/YCZH.gif" alt="Carregando..." class="loading-gif" />
-  <p>Gerando sugestão de correção...</p>
-</div>
+  <!-- ⏳ GIF de carregamento -->
+  <div *ngIf="loading" class="loading-container">
+    <img src="https://i.gifer.com/YCZH.gif" alt="Carregando..." class="loading-gif" />
+    <p>Gerando sugestão de correção...</p>
+  </div>
 
-<!-- ⚠️ Timeout / Erro -->
-<div *ngIf="timeoutMsg" class="erro-msg">
-  <p>{{ timeoutMsg }}</p>
-</div>
+  <!-- ⚠️ Timeout / Erro -->
+  <div *ngIf="timeoutMsg" class="erro-msg">
+    <p>{{ timeoutMsg }}</p>
+  </div>
 
+  <div *ngIf="similaridade !== null" class="simil-box">
+    <strong>🔍 Similaridade encontrada:</strong> {{ similaridade | number:'1.2-2' }}
+  </div>
+  <!-- ✅ Resposta bruta do backend -->
+  <div *ngIf="respostaCompleta" class="resultado-container">
+    <h4>Resposta da API:</h4>
 
-<div *ngIf="correcao" class="resultado-container">
-  <h4>Justificativa da Correção:</h4>
-  <p class="explicacao">{{ formatarCodigoCompleto(correcao).justificativa }}</p>
+    <pre>{{ respostaCompleta }}</pre>
+  </div>
 
-  <h4>Código Corrigido:</h4>
-  <pre class="codigo-html">{{ formatarCodigoCompleto(correcao).codigo }}</pre>
-
-  <button class="copy-btn" (click)="copiarParaClipboard()">Copiar</button>
-
-</div>
-
-
-
-  <!-- ✅ Link para ver os apontamentos cadastrados -->
   <div style="margin-top: 2rem; text-align: center;">
     <a routerLink="/listar" class="ver-apontamentos-link">🔍 Ver Apontamentos Cadastrados</a>
+  </div>
+
+  <!-- Novo link para Falsos Positivos -->
+  <div style="margin-top: 2rem; text-align: center;">
+    <a routerLink="/falsopositivo" class="ver-falsos-positivos-link">🔍 Ver Falsos Positivos</a>
   </div>
 </div>
