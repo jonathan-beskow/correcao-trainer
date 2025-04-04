@@ -1,12 +1,10 @@
-version: "3.9"
+version: '3.9'
 
 services:
   java-backend:
     build:
       context: ./demo
       dockerfile: Dockerfile
-      # força rebuild mesmo se cache existir
-      # dica: combine com --build na CLI
     container_name: java-backend
     ports:
       - "8081:8081"
@@ -23,7 +21,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env  # <-- Adiciona esta linha!
+      - .env
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/embed"]
       interval: 5s
@@ -31,11 +29,26 @@ services:
       retries: 5
       start_period: 5s
 
+  frontend-angular:
+    container_name: frontend-angular
+    build:
+      context: ./frontend-angular/fortify-trainer-ui
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend-angular/fortify-trainer-ui:/app
+    working_dir: /app
+    command: ["npm", "run", "start", "--", "--host", "0.0.0.0"]
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+
   mongo:
     image: mongo:6
     container_name: mongo
     ports:
       - "27017:27017"
+    command: ["--bind_ip_all"]
     volumes:
       - mongo-data:/data/db
 

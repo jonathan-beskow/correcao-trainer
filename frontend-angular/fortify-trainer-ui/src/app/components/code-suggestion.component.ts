@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AfterViewChecked, Component, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
 import { Router, RouterLink } from '@angular/router';
+import * as Prism from 'prismjs';
 
 @Component({
   selector: 'app-code-suggestion',
@@ -11,7 +12,7 @@ import { Router, RouterLink } from '@angular/router';
   styleUrls: ['./code-suggestion.component.scss'],
   imports: [CommonModule, FormsModule, RouterLink]
 })
-export class CodeSuggestionComponent {
+export class CodeSuggestionComponent implements AfterViewChecked {
   codigo: string = '';
   tipo: string = '';
   linguagem: string = '';
@@ -20,8 +21,17 @@ export class CodeSuggestionComponent {
   timeoutMsg: string = '';
   similaridade: number | null = null;
 
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  ngAfterViewChecked(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      Prism.highlightAll(); // Só executa se estiver no browser
+    }
+  }
 
   sugerirCorrecao() {
     const payload = {
@@ -52,6 +62,16 @@ export class CodeSuggestionComponent {
         this.timeoutMsg = '❌ Erro: ' + (err.message || 'Não foi possível conectar.');
       }
     });
+  }
+
+  copiarCodigo() {
+    if (this.respostaCompleta) {
+      navigator.clipboard.writeText(this.respostaCompleta).then(() => {
+        alert('Código copiado para a área de transferência!');
+      }).catch(() => {
+        alert('Falha ao copiar o código.');
+      });
+    }
   }
 
   cadastrarCorrecao() {

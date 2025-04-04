@@ -13,7 +13,8 @@ public class VetorizacaoService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private final String EMBEDDING_URL = "http://microservico-embed:8000/embed";
+    //private final String EMBEDDING_URL = "http://microservico-embed:8000/embed";
+    private final String EMBEDDING_URL = "http://localhost:8000/embed";
 
     public List<Float> gerarEmbedding(String codigo, String tipo) {
         Map<String, String> requestBody = new HashMap<>();
@@ -133,11 +134,16 @@ public class VetorizacaoService {
 
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(
-                    "http://microservico-embed:8000/gerar-correcao", request, Map.class);
+                    "http://localhost:8000/gerar-correcao", request, Map.class);
+
+            if ((String) response.getBody().get("codigoCorrigido") == null){
+
+            }
+
             return (String) response.getBody().get("codigoCorrigido");
 
         } catch (Exception e) {
-            System.out.println("❌ Erro ao gerar correção: " + e.getMessage());
+            System.out.println("Erro ao gerar correção: " + e.getMessage());
             return "Erro ao gerar sugestão de correção.";
         }
     }

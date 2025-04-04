@@ -26,11 +26,16 @@
   <div *ngIf="similaridade !== null" class="simil-box">
     <strong>🔍 Similaridade encontrada:</strong> {{ similaridade | number:'1.2-2' }}
   </div>
-  <!-- ✅ Resposta bruta do backend -->
-  <div *ngIf="respostaCompleta" class="resultado-container">
+
+  <!-- ✅ Resposta com destaque de sintaxe -->
+  <div *ngIf="respostaCompleta" class="resultado-container" highlight>
     <h4>Resposta da API:</h4>
 
-    <pre>{{ respostaCompleta }}</pre>
+    <div class="code-block" *ngIf="respostaCompleta">
+      <pre><code class="language-java">{{ respostaCompleta }}</code></pre>
+      <button class="copy-btn" (click)="copiarCodigo()">📋 Copiar</button>
+    </div>
+
   </div>
 
   <div style="margin-top: 2rem; text-align: center;">

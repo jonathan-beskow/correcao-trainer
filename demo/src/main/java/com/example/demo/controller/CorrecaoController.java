@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.ApontamentoDTO;
 import com.example.demo.dto.SugestaoCorrecaoDTO;
 import com.example.demo.model.CasoCorrigido;
+import com.example.demo.service.CodeCorrectionService;
 import com.example.demo.service.SimilaridadeService;
 import com.example.demo.service.VetorizacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class CorrecaoController {
 
     @Autowired
     private VetorizacaoService vetorizacaoService;
+
+    @Autowired
+    private CodeCorrectionService codeCorrectionService;
 
     @Autowired
     private SimilaridadeService similaridadeService;
@@ -44,7 +48,7 @@ public class CorrecaoController {
         SimilaridadeService.CasoCorrigidoComSimilaridade melhor = similares.get(0);
         CasoCorrigido c = melhor.getCaso();
 
-        String correcaoGerada = vetorizacaoService.gerarCorrecao(
+        String correcaoGerada = codeCorrectionService.gerarCorrecao(
                 dto.getTipo(),
                 dto.getCodigo(),
                 c.getCodigoOriginal(),
@@ -53,11 +57,8 @@ public class CorrecaoController {
 
         return new SugestaoCorrecaoDTO(
                 dto.getTipo(),
-                dto.getLinguagem(),
-                dto.getContexto(),
                 dto.getCodigo(),
                 correcaoGerada,
-                "Correção gerada com base em exemplo semelhante encontrado no histórico.",
                 melhor.getSimilaridade()
         );
     }

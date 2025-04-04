@@ -25,8 +25,11 @@ public class SugestaoCorrecaoService {
     @Autowired
     private SimilaridadeService similaridadeService;
 
+    private CodeCorrectionService codeCorrectionService;
+
+
     public String sugerirCorrecao(ApontamentoDTO dto) {
-        // 1. Gerar embedding com base em código + tipo
+
         List<Float> embedding = vetorizacaoService.gerarEmbedding(dto.getCodigo(), dto.getTipo());
 
         // 2. Buscar similar mais próximo no banco
@@ -50,7 +53,6 @@ public class SugestaoCorrecaoService {
         Map<String, String> exemploMap = new HashMap<>();
         exemploMap.put("codigo_original", exemplo.getCodigoOriginal());
         exemploMap.put("codigo_corrigido", exemplo.getCodigoCorrigido());
-        exemploMap.put("linguagem", exemplo.getLinguagem());
         exemploMap.put("contexto", exemplo.getContexto());
         exemplos.add(exemploMap);
 
@@ -62,19 +64,17 @@ public class SugestaoCorrecaoService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    "http://microservico-embed:8000/gerar-correcao", entity, Map.class
+            String correcao = codeCorrectionService.gerarCorrecao(
+                    dto.getTipo(), exemplo.getCodigoOriginal(), exemplo.getCodigoCorrigido(), dto.getCodigo()
             );
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                Object correcao = response.getBody().get("codigoCorrigido");
-                return correcao != null ? correcao.toString() : "Nenhuma correção gerada.";
+            if (correcao != null && !correcao.isEmpty()) {
+                return correcao;
             } else {
-                return "Erro na requisição ao microserviço: " + response.getStatusCode();
+                return "Nenhuma correção gerada.";
             }
         } catch (Exception e) {
-            return "Erro ao comunicar com o microserviço: " + e.getMessage();
+            return "Erro ao realizar a correção: " + e.getMessage();
         }
     }
 

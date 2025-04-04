@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,14 +44,14 @@ public class FalsosPositivosController {
     @PostMapping("/gerar-relatorio")
     public ResponseEntity<byte[]> gerarRelatorioFalsosPositivos(@RequestParam("file") MultipartFile file) throws IOException {
         // Processa o CSV para extrair os dados
-        Map<String, String> data = processarCSV(file);
+        Map<String, List<String[]>> groupedData = processarCSV(file);
 
         // Caminho do template e onde o relatório será salvo
         String templatePath = "Template.docx"; // Certifique-se de que o template está no diretório correto (src/main/resources)
 
         // Gerar o relatório em memória e retornar como resposta
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        fillTemplate.fillTemplate(templatePath, byteArrayOutputStream, data);
+        fillTemplate.fillTemplate(templatePath, byteArrayOutputStream, groupedData);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=relatorio_falsos_positivos.docx");
@@ -58,22 +59,23 @@ public class FalsosPositivosController {
         return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
     }
 
-    public Map<String, String> processarCSV(MultipartFile file) throws IOException {
-        Map<String, String> data = new HashMap<>();
+    public Map<String, List<String[]>> processarCSV(MultipartFile file) throws IOException {
+        Map<String, List<String[]>> groupedData = new HashMap<>();
 
-        // Lê o arquivo CSV
         try (Reader reader = new InputStreamReader(file.getInputStream())) {
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader().parse(reader);
 
-            // Processa cada linha do CSV
             for (CSVRecord record : records) {
-                // Mapeia os dados CSV para placeholders
-                data.put("tipo_apontamento", record.get("category"));
-                data.put("path", record.get("path"));
-                data.put("friority", record.get("friority"));
+                String tipoApontamento = record.get("category");
+                if (TIPOS_FALSOS_POSITIVOS.contains(tipoApontamento)) {
+                    String path = record.get("path");
+                    String[] apontamento = new String[]{path};
+
+                    groupedData.computeIfAbsent(tipoApontamento, k -> new ArrayList<>()).add(apontamento);
+                }
             }
         }
 
-        return data;
+        return groupedData;
     }
 }
