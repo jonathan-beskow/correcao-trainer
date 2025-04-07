@@ -1,0 +1,7 @@
+{"input": "String nome = request.getParameter(\"nome\"); out.println(\"<html>\" + nome + \"</html>\");", "output": "String nome = sanitize(request.getParameter(\"nome\")); out.println(\"<html>\" + nome + \"</html>\");", "tipo": "Xss"}
+{"input": "String sql = \"SELECT * FROM users WHERE name = '\" + nome + \"'\";", "output": "PreparedStatement stmt = conn.prepareStatement(\"SELECT * FROM users WHERE name = ?\"); stmt.setString(1, nome);", "tipo": "SQL Injection"}
+{"input": "String nome = request.getParameter(\"nome\"); out.println(\"<div>\" + nome + \"</div>\");", "output": "String nome = HtmlUtils.htmlEscape(request.getParameter(\"nome\")); out.println(\"<div>\" + nome + \"</div>\");", "tipo": "Xss"}
+{"input": "File file = new File(\"/uploads/\" + request.getParameter(\"filename\"));", "output": "String filename = Paths.get(request.getParameter(\"filename\")).getFileName().toString(); File file = new File(\"/uploads/\" + filename);", "tipo": "Path Traversal"}
+{"input": "String sql = \"SELECT * FROM users WHERE name = '\" + nome + \"'\";", "output": "PreparedStatement stmt = conn.prepareStatement(\"SELECT * FROM users WHERE name = ?\"); stmt.setString(1, nome);", "tipo": "SQL Injection"}
+{"input": "String user = \"admin\"; String pass = \"123456\";", "output": "String user = System.getenv(\"APP_USER\"); String pass = System.getenv(\"APP_PASS\");", "tipo": "Hardcoded Credentials"}
+{"input": "Runtime.getRuntime().exec(\"ping \" + ip);", "output": "ProcessBuilder pb = new ProcessBuilder(\"ping\", ip); pb.start();", "tipo": "Command Injection"}
