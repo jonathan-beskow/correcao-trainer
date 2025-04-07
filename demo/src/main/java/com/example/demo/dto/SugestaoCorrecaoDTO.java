@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class SugestaoCorrecaoDTO {
     private String tipo;
+
+    @JsonIgnore
     private String linguagem;
+
+    @JsonIgnore
     private String contexto;
     private String codigoOriginal;
     private String codigoCorrigido;

@@ -1,10 +1,16 @@
 package com.example.demo.service;
 
+
 import com.example.demo.model.CasoCorrigido;
 import com.example.demo.repository.CasoCorrigidoRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,8 +20,28 @@ public class CasoCorrigidoService {
     @Autowired
     private CasoCorrigidoRepository repository;
 
+
     public CasoCorrigido salvar(CasoCorrigido caso) {
-        return repository.save(caso);
+        CasoCorrigido salvo = repository.save(caso);
+
+        try {
+            // Envia código para indexação no Python
+            ObjectMapper mapper = new ObjectMapper();
+            String body = mapper.writeValueAsString(new EmbeddingDTO(caso.getCodigoOriginal(), caso.getTipo()));
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://microservico-embed:8000/adicionar"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+
+            HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        } catch (Exception e) {
+            System.err.println("⚠️ Erro ao enviar código para FAISS: " + e.getMessage());
+        }
+
+        return salvo;
     }
 
     public List<String> listarTiposDeApontamentos() {
@@ -24,6 +50,17 @@ public class CasoCorrigidoService {
                 .map(CasoCorrigido::getTipo)
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+
+    static class EmbeddingDTO {
+        public String codigo;
+        public String tipo;
+
+        public EmbeddingDTO(String codigo, String tipo) {
+            this.codigo = codigo;
+            this.tipo = tipo;
+        }
     }
 
 }

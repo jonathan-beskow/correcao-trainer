@@ -2,14 +2,11 @@ package com.example.demo.service;
 
 import com.example.demo.dto.ApontamentoDTO;
 import com.example.demo.model.CasoCorrigido;
-import com.example.demo.service.SimilaridadeService.CasoCorrigidoComSimilaridade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +16,6 @@ import java.util.Map;
 @Service
 public class SugestaoCorrecaoService {
 
-    @Autowired
-    private VetorizacaoService vetorizacaoService;
 
     @Autowired
     private SimilaridadeService similaridadeService;
@@ -30,17 +25,18 @@ public class SugestaoCorrecaoService {
 
     public String sugerirCorrecao(ApontamentoDTO dto) {
 
-        List<Float> embedding = vetorizacaoService.gerarEmbedding(dto.getCodigo(), dto.getTipo());
-
-        // 2. Buscar similar mais próximo no banco
         List<SimilaridadeService.CasoCorrigidoComSimilaridade> similares =
-                similaridadeService.buscarSimilares(embedding, dto.getTipo());
+                similaridadeService.buscarSimilares(dto.getCodigo(), dto.getTipo());
 
         if (similares.isEmpty()) {
             return "Nenhum exemplo similar encontrado no banco.";
         }
 
         CasoCorrigido exemplo = similares.get(0).getCaso();
+
+        if (similares.isEmpty()) {
+            return "Nenhum exemplo similar encontrado no banco.";
+        }
 
         // 3. Montar o payload com os campos adicionais
         Map<String, Object> payload = new HashMap<>();

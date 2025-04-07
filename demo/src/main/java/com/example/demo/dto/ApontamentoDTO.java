@@ -1,10 +1,15 @@
 package com.example.demo.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class ApontamentoDTO {
 
     private String codigo;
     private String tipo;
+
+    @JsonIgnore
     private String linguagem;
+    @JsonIgnore
     private String contexto;
 
     public String getCodigo() {

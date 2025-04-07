@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,16 @@ public class CodeCorrectionService {
     private String OPEN_API_KEY;
 
 
+    @Value("${openai.model:gpt-4-turbo}")
+    private String openaiModel;
+
+
     public String gerarCorrecao(String tipo, String codigoOriginal, String codigoCorrigido, String codigoAlvo) {
         logger.info("Iniciando correção de código com tipo: {}", tipo);
 
         String prompt = "";
 
-        if (codigoCorrigido.isEmpty() || codigoCorrigido==null) {
+        if (codigoCorrigido == null || codigoCorrigido.isBlank()) {
             prompt = StringUtils.generatePromptWithOutBase(tipo, codigoAlvo);
         } else {
             //String prompt = StringUtils.generatePrompt(tipo, codigoOriginal, codigoCorrigido, codigoAlvo);
@@ -44,7 +49,7 @@ public class CodeCorrectionService {
                     .add(objectMapper.createObjectNode().put("role", "user").put("content", prompt));
 
             JsonNode payloadNode = objectMapper.createObjectNode()
-                    .put("model", "gpt-4-turbo")
+                    .put("model", openaiModel)
                     .set("messages", messagesNode);
 
             payload = objectMapper.writeValueAsString(payloadNode);
@@ -60,8 +65,10 @@ public class CodeCorrectionService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(payload, headers);
 
-        RestTemplate restTemplate = new RestTemplate();
+
         String apiUrl = "https://api.openai.com/v1/chat/completions";
+
+        RestTemplate restTemplate = new RestTemplate();
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
@@ -87,9 +94,10 @@ public class CodeCorrectionService {
                 String somenteCodigo = extrairCodigosMarkdown(conteudoCompleto);
 
                 if (somenteCodigo.isEmpty()) {
-                    logger.warn("Não foi encontrado bloco de código Markdown na resposta.");
-                    return "Aviso: Nenhum código foi encontrado na resposta da IA.";
+                    logger.warn("Nenhum bloco de código Markdown encontrado. Retornando conteúdo bruto.");
+                    return conteudoCompleto;
                 }
+
 
                 logger.info("Código corrigido extraído com sucesso.");
                 return somenteCodigo;

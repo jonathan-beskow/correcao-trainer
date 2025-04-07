@@ -1,0 +1,37 @@
+[
+  {
+    "tipo": "XSS",
+    "linguagem": "Java",
+    "contexto": "Impressão direta de parâmetro não sanitizado no HTML.",
+    "codigoOriginal": "String nome = request.getParameter(\"nome\"); out.println(\"<div>\" + nome + \"</div>\");",
+    "codigoCorrigido": "String nome = HtmlUtils.htmlEscape(request.getParameter(\"nome\")); out.println(\"<div>\" + nome + \"</div>\");"
+  },
+  {
+    "tipo": "SQL Injection",
+    "linguagem": "Java",
+    "contexto": "Concatenando valores do usuário em queries SQL.",
+    "codigoOriginal": "String sql = \"SELECT * FROM users WHERE name = '\" + nome + \"'\";",
+    "codigoCorrigido": "PreparedStatement stmt = conn.prepareStatement(\"SELECT * FROM users WHERE name = ?\"); stmt.setString(1, nome);"
+  },
+  {
+    "tipo": "Path Traversal",
+    "linguagem": "Java",
+    "contexto": "Caminho de arquivo formado a partir de entrada do usuário.",
+    "codigoOriginal": "File file = new File(\"/uploads/\" + request.getParameter(\"filename\"));",
+    "codigoCorrigido": "String filename = Paths.get(request.getParameter(\"filename\")).getFileName().toString(); File file = new File(\"/uploads/\" + filename);"
+  },
+  {
+    "tipo": "Command Injection",
+    "linguagem": "Java",
+    "contexto": "Execução de comando do sistema com entrada do usuário.",
+    "codigoOriginal": "Runtime.getRuntime().exec(\"ping \" + ip);",
+    "codigoCorrigido": "ProcessBuilder pb = new ProcessBuilder(\"ping\", ip); pb.start();"
+  },
+  {
+    "tipo": "Hardcoded Credentials",
+    "linguagem": "Java",
+    "contexto": "Usuário e senha estão embutidos no código.",
+    "codigoOriginal": "String user = \"admin\"; String pass = \"123456\";",
+    "codigoCorrigido": "String user = System.getenv(\"APP_USER\"); String pass = System.getenv(\"APP_PASS\");"
+  }
+]

@@ -5,7 +5,6 @@ import com.example.demo.dto.SugestaoCorrecaoDTO;
 import com.example.demo.model.CasoCorrigido;
 import com.example.demo.service.CodeCorrectionService;
 import com.example.demo.service.SimilaridadeService;
-import com.example.demo.service.VetorizacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +17,6 @@ import java.util.Map;
 @RequestMapping("/sugerir-correcao")
 public class CorrecaoController {
 
-    @Autowired
-    private VetorizacaoService vetorizacaoService;
 
     @Autowired
     private CodeCorrectionService codeCorrectionService;
@@ -29,9 +26,9 @@ public class CorrecaoController {
 
     @PostMapping("/corrigir")
     public SugestaoCorrecaoDTO corrigir(@RequestBody ApontamentoDTO dto) {
-        List<Float> embedding = vetorizacaoService.gerarEmbedding(dto.getCodigo(), dto.getTipo());
+        // Agora passamos apenas o código e tipo diretamente para o serviço
         List<SimilaridadeService.CasoCorrigidoComSimilaridade> similares =
-                similaridadeService.buscarSimilares(embedding, dto.getTipo());
+                similaridadeService.buscarSimilares(dto.getCodigo(), dto.getTipo());
 
         if (similares.isEmpty()) {
             return new SugestaoCorrecaoDTO(
@@ -63,11 +60,23 @@ public class CorrecaoController {
         );
     }
 
+
     @PostMapping("/cadastrar-caso")
     public ResponseEntity<Map<String, String>> cadastrarCaso(@RequestBody CasoCorrigido novoCaso) {
-        boolean sucesso = similaridadeService.inserirCasoCorrigido(novoCaso);
-
         Map<String, String> resposta = new HashMap<>();
+
+        // Validação do campo 'tipo'
+        if (novoCaso.getTipo() == null || novoCaso.getTipo().trim().isEmpty()) {
+            resposta.put("mensagem", "O campo 'tipo' é obrigatório.");
+            return ResponseEntity.badRequest().body(resposta);
+        }
+
+        // Normalização do tipo (opcional, pode ajustar conforme o padrão que quiser)
+        String tipoNormalizado = novoCaso.getTipo().trim();
+        tipoNormalizado = tipoNormalizado.substring(0, 1).toUpperCase() + tipoNormalizado.substring(1).toLowerCase();
+        novoCaso.setTipo(tipoNormalizado);
+
+        boolean sucesso = similaridadeService.inserirCasoCorrigido(novoCaso);
 
         if (sucesso) {
             resposta.put("mensagem", "Caso inserido com sucesso.");
@@ -77,4 +86,5 @@ public class CorrecaoController {
             return ResponseEntity.status(500).body(resposta);
         }
     }
+
 }

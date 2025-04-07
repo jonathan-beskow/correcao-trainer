@@ -1,6 +1,8 @@
 fastapi
 uvicorn
-transformers
+transformers==4.38.2
 torch
 python-dotenv
 requests
+faiss-cpu
+pymongo

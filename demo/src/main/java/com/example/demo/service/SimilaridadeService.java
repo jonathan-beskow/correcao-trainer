@@ -2,11 +2,19 @@ package com.example.demo.service;
 
 import com.example.demo.model.CasoCorrigido;
 import com.example.demo.repository.CasoCorrigidoRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SimilaridadeService {
@@ -15,37 +23,43 @@ public class SimilaridadeService {
     private CasoCorrigidoRepository repository;
 
     @Autowired
-    private VetorizacaoService vetorizacaoService;
-
-    @Autowired
     private CasoCorrigidoRepository casoCorrigidoRepository;
 
-    public List<CasoCorrigidoComSimilaridade> buscarSimilares(List<Float> novoEmbedding, String tipo) {
-        List<CasoCorrigido> casos = repository.findByTipo(tipo);
-        List<CasoCorrigidoComSimilaridade> similares = new ArrayList<>();
+    public List<CasoCorrigidoComSimilaridade> buscarSimilares(String codigoNovo, String tipo) {
+        try {
+            // 1. Monta JSON para a API Python
+            Map<String, Object> json = new HashMap<>();
+            json.put("codigo", codigoNovo);
+            json.put("tipo", tipo);
+            json.put("k", 3);
 
-        for (CasoCorrigido caso : casos) {
-            double similaridade = calcularSimilaridadeCosseno(novoEmbedding, caso.getEmbedding());
-            similares.add(new CasoCorrigidoComSimilaridade(caso, similaridade));
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8000/buscar_similar"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(json)))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            JsonNode node = new ObjectMapper().readTree(response.body());
+
+            List<CasoCorrigidoComSimilaridade> similares = new ArrayList<>();
+
+            for (JsonNode item : node.get("similares")) {
+                String codigoSimilar = item.get("codigo").asText();
+                double distancia = item.get("distancia").asDouble();
+                double similaridade = 1.0 / (1.0 + distancia); // Conversão simples
+
+                repository.findByCodigoOriginal(codigoSimilar)
+                        .ifPresent(caso -> similares.add(new CasoCorrigidoComSimilaridade(caso, similaridade)));
+            }
+
+            return similares;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-
-        // Ordena do mais similar para o menos similar
-        similares.sort((a, b) -> Double.compare(b.getSimilaridade(), a.getSimilaridade()));
-
-        // Retorna os top 3 (ou todos, se tiver poucos)
-        return similares.subList(0, Math.min(similares.size(), 3));
-    }
-
-    private double calcularSimilaridadeCosseno(List<Float> v1, List<Float> v2) {
-        if (v1 == null || v2 == null || v1.size() != v2.size()) return 0.0;
-
-        double dot = 0.0, normA = 0.0, normB = 0.0;
-        for (int i = 0; i < v1.size(); i++) {
-            dot += v1.get(i) * v2.get(i);
-            normA += Math.pow(v1.get(i), 2);
-            normB += Math.pow(v2.get(i), 2);
-        }
-        return dot / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-10);
     }
 
     public static class CasoCorrigidoComSimilaridade {
@@ -69,15 +83,29 @@ public class SimilaridadeService {
 
     public boolean inserirCasoCorrigido(CasoCorrigido caso) {
         try {
-            List<Float> embedding = vetorizacaoService.gerarEmbedding(caso.getCodigoOriginal(), caso.getTipo());
-            caso.setEmbedding(embedding);
+            Map<String, String> json = new HashMap<>();
+            json.put("codigo", caso.getCodigoOriginal());
+            json.put("tipo", caso.getTipo());
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8000/adicionar"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(json)))
+                    .build();
+
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // Apenas armazena no Mongo, sem mais cálculo manual
             casoCorrigidoRepository.save(caso);
             return true;
+
         } catch (Exception e) {
             System.out.println("Erro ao inserir caso: " + e.getMessage());
             return false;
         }
     }
+
 
 }
 
