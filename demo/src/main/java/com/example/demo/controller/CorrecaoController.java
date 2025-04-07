@@ -65,7 +65,7 @@ public class CorrecaoController {
                 dto.getTipo(),
                 dto.getCodigo(),
                 exemploCorrigido,
-                exemploCorrigido
+                dto.getCodigo()
         );
 
         logger.info("Correção gerada pela IA:\n{}", correcaoGerada);
