@@ -32,7 +32,7 @@ public class SugestaoCorrecaoService {
             return "Nenhum exemplo similar encontrado no banco.";
         }
 
-        CasoCorrigido exemplo = similares.get(0).getCaso();
+        CasoCorrigido exemplo = similares.getFirst().getCaso();
 
         if (similares.isEmpty()) {
             return "Nenhum exemplo similar encontrado no banco.";

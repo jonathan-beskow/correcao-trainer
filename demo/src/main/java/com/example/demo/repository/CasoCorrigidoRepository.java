@@ -11,4 +11,7 @@ public interface CasoCorrigidoRepository extends MongoRepository<CasoCorrigido, 
 
     Optional<CasoCorrigido> findByCodigoOriginal(String codigoOriginal);
 
+    Optional<CasoCorrigido> findByCodigoCorrigido(String codigoCorrigido);
+
+
 }

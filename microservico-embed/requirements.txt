@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 transformers==4.38.2
 torch
 python-dotenv
