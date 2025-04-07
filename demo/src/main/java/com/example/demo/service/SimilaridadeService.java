@@ -7,7 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -28,33 +33,30 @@ public class SimilaridadeService {
 
     public Optional<String> obterCodigoCorrigidoMaisSimilar(String codigoNovo, String tipo) {
         try {
-            Map<String, Object> json = new HashMap<>();
-            json.put("codigo", codigoNovo);
-            json.put("tipo", tipo);
-            json.put("k", 1);
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            String requestBody = objectMapper.writeValueAsString(json);
-            logger.info("Enviando requisição para Python: {}", requestBody);
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("codigo", codigoNovo);
+            payload.put("tipo", tipo);
+            payload.put("k", 1);
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URL_PYTHON + "/buscar_similar"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
-                    .build();
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
-            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-            logger.info("Resposta do Python: {}", response.body());
+            ResponseEntity<String> response = restTemplate.postForEntity(URL_PYTHON + "/buscar_similar", entity, String.class);
+            logger.info("Resposta do Python: {}", response.getBody());
 
-            if (response.statusCode() != 200) {
-                logger.error("Erro na resposta do Python: HTTP {}", response.statusCode());
+            if (response.getStatusCodeValue() != 200) {
+                logger.error("Erro na resposta do Python: HTTP {}", response.getStatusCodeValue());
                 return Optional.empty();
             }
 
-            JsonNode node = objectMapper.readTree(response.body());
+            JsonNode node = objectMapper.readTree(response.getBody());
             JsonNode corrigidoNode = node.get("codigoCorrigido");
 
             if (corrigidoNode == null || corrigidoNode.isNull()) {
-                logger.warn("Resposta do Python sem campo 'codigoCorrigido': {}", response.body());
+                logger.warn("Resposta do Python sem campo 'codigoCorrigido': {}", response.getBody());
                 return Optional.empty();
             }
 
