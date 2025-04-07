@@ -23,7 +23,6 @@ public class FillTemplate {
 
         XWPFDocument document = new XWPFDocument(fis);
 
-        // Substituir placeholders comuns
         for (XWPFParagraph paragraph : document.getParagraphs()) {
             for (XWPFRun run : paragraph.getRuns()) {
                 String text = run.getText(0);

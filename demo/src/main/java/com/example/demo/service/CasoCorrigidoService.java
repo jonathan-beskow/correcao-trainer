@@ -20,17 +20,18 @@ public class CasoCorrigidoService {
     @Autowired
     private CasoCorrigidoRepository repository;
 
+    private final static String URL_PYTHON = "http://microservico-embed:8000/adicionar";
+
 
     public CasoCorrigido salvar(CasoCorrigido caso) {
         CasoCorrigido salvo = repository.save(caso);
 
         try {
-            // Envia código para indexação no Python
             ObjectMapper mapper = new ObjectMapper();
             String body = mapper.writeValueAsString(new EmbeddingDTO(caso.getCodigoOriginal(), caso.getTipo()));
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://microservico-embed:8000/adicionar"))
+                    .uri(URI.create(URL_PYTHON))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(body))
                     .build();
@@ -38,7 +39,7 @@ public class CasoCorrigidoService {
             HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
         } catch (Exception e) {
-            System.err.println("⚠️ Erro ao enviar código para FAISS: " + e.getMessage());
+            System.err.println("Erro ao enviar código para FAISS: " + e.getMessage());
         }
 
         return salvo;

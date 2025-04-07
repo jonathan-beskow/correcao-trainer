@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.CodigoCorrigidoComSimilaridadeDTO;
 import com.example.demo.model.CasoCorrigido;
 import com.example.demo.repository.CasoCorrigidoRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +32,8 @@ public class SimilaridadeService {
     @Autowired
     private CasoCorrigidoRepository casoCorrigidoRepository;
 
-    public Optional<String> obterCodigoCorrigidoMaisSimilar(String codigoNovo, String tipo) {
+    //public Optional<String> obterCodigoCorrigidoMaisSimilar(String codigoNovo, String tipo) {
+    public Optional<CodigoCorrigidoComSimilaridadeDTO> obterCodigoCorrigidoMaisSimilar(String codigoNovo, String tipo){
         try {
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
@@ -40,7 +42,6 @@ public class SimilaridadeService {
             Map<String, Object> payload = new HashMap<>();
             payload.put("codigo", codigoNovo);
             payload.put("tipo", tipo);
-            payload.put("k", 1);
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
@@ -64,8 +65,9 @@ public class SimilaridadeService {
             if (codigoCorrigido.isBlank() || codigoCorrigido.toLowerCase().contains("nenhuma sugest")) {
                 return Optional.empty();
             }
+            double similaridade = node.has("similaridade") ? node.get("similaridade").asDouble() : 0.0;
 
-            return Optional.of(codigoCorrigido);
+            return Optional.of(new CodigoCorrigidoComSimilaridadeDTO(codigoCorrigido, similaridade));
 
         } catch (Exception e) {
             logger.error("Erro ao buscar código corrigido similar", e);

@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ApontamentoDTO;
+import com.example.demo.dto.CodigoCorrigidoComSimilaridadeDTO;
 import com.example.demo.dto.SugestaoCorrecaoDTO;
 import com.example.demo.model.CasoCorrigido;
 import com.example.demo.service.CodeCorrectionService;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -36,8 +39,8 @@ public class CorrecaoController {
     public SugestaoCorrecaoDTO corrigir(@RequestBody ApontamentoDTO dto) {
         logger.info("Recebida solicitação de correção. Tipo: {}, Código:\n{}", dto.getTipo(), dto.getCodigo());
 
-        Optional<String> exemploCorrigidoOptional = similaridadeService
-                .obterCodigoCorrigidoMaisSimilar(dto.getCodigo(), dto.getTipo());
+        Optional<CodigoCorrigidoComSimilaridadeDTO> exemploCorrigidoOptional =
+                similaridadeService.obterCodigoCorrigidoMaisSimilar(dto.getCodigo(), dto.getTipo());
 
         if (exemploCorrigidoOptional.isEmpty()) {
             logger.warn("Nenhum exemplo similar encontrado para o código fornecido.");
@@ -52,24 +55,32 @@ public class CorrecaoController {
             );
         }
 
-        String exemploCorrigido = exemploCorrigidoOptional.get();
+        CodigoCorrigidoComSimilaridadeDTO resultado = exemploCorrigidoOptional.get();
+        String exemploCorrigido = resultado.getCodigoCorrigido();
+        double similaridade = resultado.getSimilaridade();
+
         logger.info("Código corrigido mais semelhante recuperado:\n{}", exemploCorrigido);
 
         String correcaoGerada = codeCorrectionService.gerarCorrecao(
                 dto.getTipo(),
                 dto.getCodigo(),
-                "", // sem o original similar, pois não está vindo do Mongo
+                exemploCorrigido,
                 exemploCorrigido
         );
 
         logger.info("Correção gerada pela IA:\n{}", correcaoGerada);
 
+        double similaridadeFormatada = new BigDecimal(similaridade)
+                .setScale(4, RoundingMode.HALF_UP)
+                .doubleValue();
+
         return new SugestaoCorrecaoDTO(
                 dto.getTipo(),
                 dto.getCodigo(),
                 correcaoGerada,
-                1.0 // você pode calcular isso usando a distância, se quiser
+                similaridadeFormatada
         );
+
     }
 
     @PostMapping("/cadastrar-caso")

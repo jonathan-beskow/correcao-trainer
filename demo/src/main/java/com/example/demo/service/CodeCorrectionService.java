@@ -1,11 +1,10 @@
 package com.example.demo.service;
 
-import com.example.demo.util.StringUtils;
+import com.example.demo.util.Promptutils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -33,10 +32,10 @@ public class CodeCorrectionService {
         String prompt = "";
 
         if (codigoCorrigido == null || codigoCorrigido.isBlank()) {
-            prompt = StringUtils.generatePromptWithOutBase(tipo, codigoAlvo);
+            prompt = Promptutils.generatePromptWithOutBase(tipo, codigoAlvo);
         } else {
             //String prompt = StringUtils.generatePrompt(tipo, codigoOriginal, codigoCorrigido, codigoAlvo);
-            prompt = StringUtils.generatePrompt(tipo, codigoCorrigido, codigoAlvo);
+            prompt = Promptutils.generatePrompt(tipo, codigoCorrigido, codigoAlvo);
         }
 
 

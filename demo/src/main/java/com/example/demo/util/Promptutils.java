@@ -1,12 +1,11 @@
 package com.example.demo.util;
 
-import com.example.demo.service.CodeCorrectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StringUtils {
+public class Promptutils {
 
-    private static final Logger logger = LoggerFactory.getLogger(StringUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(Promptutils.class);
 
     public static String generatePrompt(String tipo, String codigoOriginal, String codigoCorrigido, String codigoAlvo) {
         return String.format("""
